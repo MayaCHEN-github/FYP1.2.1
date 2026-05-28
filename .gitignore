@@ -1,0 +1,24 @@
+# Model files
+*.safetensors
+*.pt
+*.pkl
+
+# Checkpoints
+checkpoints/
+
+# Model directories
+jailbreak_model/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Gradio
+.gradio/
+
+# Results (can be regenerated)
+results/
+analysis_results/
+
+# Data (if large)
+data/
