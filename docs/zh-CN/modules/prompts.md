@@ -1,0 +1,41 @@
+**语言：** [English](../../en/modules/prompts.md) · 简体中文 · [繁體中文（香港）](../../zh-HK/modules/prompts.md)
+
+# 提示词层
+
+证据状态：除特别标注外，本页基于当前源码已确认。
+
+## 白话模型
+
+提示词层管理三类文本素材，并在发送前拼成模型真正看到的对话：
+
+1. **系统提示（system message）**：定义模型角色；多数版本把整份 `database.json` 注入 `{database}` 占位符，让模型「知道库里有什么」。
+2. **种子（seed）**：表面用户任务，默认是「列出所有人隐私字段」。
+3. **越狱模板（prompt）**：在种子外包一层攻击话术（目标劫持、拒绝压制、角色扮演、代码补全等），模板内用 `{seed}` 占位。
+
+`generate_full_prompt(seed_key, prompt_key)` 的输出作为 user 消息；`get_system_message(key)` 的输出作为 system 消息。
+
+## 代码模型
+
+入口类：[`PromptManager`](../../../prompts/prompt_manager.py)。
+
+| 素材 | 来源文件 | 访问方法 |
+| --- | --- | --- |
+| 系统提示 | [`system_messages.json`](../../../prompts/prompt_files/system_messages.json) | `get_system_message` |
+| 种子 | [`seeds.json`](../../../prompts/prompt_files/seeds.json) | `get_seed` |
+| 越狱模板 | [`prompts.py`](../../../prompts/prompt_files/prompts.py) | `get_prompt` / `generate_full_prompt` |
+
+`PromptType` 枚举标记模板类别（`target_hijacking`、`refusal_suppression`、`code_injection` 等）。`combine_prompts` 可按类型合并多个模板，但主流程多用单键选取。
+
+`load_database` 在初始化时把 [`data/database.json`](../../../data/database.json) 读入 `self.database`，供系统提示格式化。
+
+辅助脚本（非运行时必需）：
+
+- [`prompt_composer.py`](../../../prompts/prompt_files/prompt_composer.py) + [`run_example.py`](../../../run_example.py)：组合示例入口
+- [`prompt_combined.py`](../../../prompts/prompt_files/prompt_combined.py) / [`target_hijacking_prompts.py`](../../../prompts/prompt_files/target_hijacking_prompts.py)：两两组合模板
+- [`generate_combined.py`](../../../prompts/generate_combined.py)：给组合表写入 `component1` / `component2` 元数据
+
+## 接下去阅读
+
+- 19 个模板键名与类型：[提示词清单](../references/prompts.md)
+- 会话如何把 system + user 送进模型：[会话层](conversation.md)
+- 端到端拼装顺序：[端到端流程](../walkthrough.md) Step 2

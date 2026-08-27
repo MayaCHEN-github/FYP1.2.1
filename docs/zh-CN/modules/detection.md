@@ -1,0 +1,49 @@
+**语言：** [English](../../en/modules/detection.md) · 简体中文 · [繁體中文（香港）](../../zh-HK/modules/detection.md)
+
+# 检测层
+
+证据状态：除特别标注外，本页基于当前源码已确认。
+
+## 白话模型
+
+检测层在模型输出落盘后回答两个问题：
+
+1. **是否泄露**：输出里是否出现 `database.json` 中的真实字段值（姓名、身份证号、电话等）。
+2. **是否拒绝**：输出里是否包含「不能」「无法」「不提供」等拒绝措辞。
+
+批量测试用「泄露 + 拒绝」组合成混淆矩阵，从防御视角衡量绕过与拦截效果。Gradio 演示仅展示正则泄露检测结果。
+
+## 代码模型
+
+实现文件：[`utils/jailbreak_detector.py`](../../../utils/jailbreak_detector.py)。
+
+### 泄露检测
+
+| 类 | 机制 | 使用场景 |
+| --- | --- | --- |
+| `JailbreakDetector` | GPT-3.5-instruct 按长系统提示做语义判定 | 基类，含完整判定规则文本；主路径未使用 |
+| `RegexJailbreakDetector` | 对库中每条记录的字段做 `re.search` | `app.py`、`leak_test.py` 实际使用 |
+
+`RegexJailbreakDetector.detect` 返回字段：
+
+- `contains_leak`：首条完整记录、全库完整、或任一字段命中即为真
+- `result`：中文描述泄露范围
+- `confidence`：固定 `High`
+
+### 拒绝检测
+
+| 类 | 机制 | 使用场景 |
+| --- | --- | --- |
+| `RegexRefusalDetector` | 18 个中文拒绝词正则 OR 匹配 | 已实现，`leak_test.py` 未使用 |
+| `ModelRefusalDetector` | `qwen-72b` 按结构化提示输出 Yes/No | `leak_test.py` 实际使用 |
+
+`ModelRefusalDetector` 每次检测新建 `ModelManager` 并流式拼完整响应再解析 `Detection Result:` 行。
+
+### 与混淆矩阵的衔接
+
+[`leak_test.py`](../../../leak_test.py) 中 `calculate_confusion_matrix` 把每次测试映射为 TP/FP/TN/FN（防御视角）。含义见 [混淆矩阵定义](../references/confusion-matrix.md)。
+
+## 接下去阅读
+
+- 指标如何打印与落盘：[批量测试](batch-testing.md)
+- 矩阵字段定义：[混淆矩阵定义](../references/confusion-matrix.md)

@@ -4,6 +4,10 @@
 
 **Compare jailbreak prompts across LLMs, then measure whether private data actually leaks.**
 
+**Language:** English · [简体中文](README.zh-CN.md) · [繁體中文（香港）](README.zh-HK.md)
+
+Detailed guides: [docs/en](docs/en/index.md) · [docs/zh-CN](docs/zh-CN/index.md) · [docs/zh-HK](docs/zh-HK/index.md)
+
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Gradio](https://img.shields.io/badge/UI-Gradio_4-FF7C00)](https://www.gradio.app/)
 [![LangChain](https://img.shields.io/badge/Orchestration-LangChain-1C3C3C)](https://www.langchain.com/)
@@ -156,6 +160,9 @@ python analyze_results.py
 
 Reads `results/*.json` and writes `analysis_results/analysis_summary.json` plus leak / refusal / TP-TN-FP-FN heatmaps.
 
+> [!NOTE]
+> `summary_*.json` files are **not** parsed by `analyze_results.py`. Keep the per-run `leak_test` JSON files.
+
 ### 5. Prompt composer playground
 
 ```bash
@@ -244,5 +251,6 @@ Leak detection (`RegexJailbreakDetector`) looks for exact field values from `dat
 │   └── prompt_files/           # system messages, seeds, templates
 ├── chains/conversation_chain.py
 ├── utils/jailbreak_detector.py
-└── data/database.json          # Synthetic PII used in system prompts
+├── data/database.json          # Synthetic PII used in system prompts
+└── docs/                       # English / zh-CN / zh-HK guides
 ```
